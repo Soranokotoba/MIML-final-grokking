@@ -1,0 +1,18 @@
+[project]
+name = "MIML-final-grokking"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "yhtq", email = "1414672068@qq.com"},
+]
+dependencies = ["torch>=2.5.1", "omegaconf>=2.3.0", "einops>=0.8.0", "matplotlib>=3.9.3"]
+requires-python = "==3.12.*"
+readme = "README.md"
+license = {text = "none"}
+
+
+[tool.pdm]
+distribution = false
+
+[tool.pdm.scripts]
+train = {cmd = "python train.py"}

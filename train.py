@@ -1,4 +1,5 @@
-from models import get_model
+from datetime import datetime
+from models import Transformer, TransformerModel, get_model
 from load_yaml import load_config
 from data_generation import get_dataset
 
@@ -10,7 +11,7 @@ import os
 
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
-def train_model():
+def train_model(model: TransformerModel | Transformer, device: torch.device):
     train_acc = []
     eval_acc = []
 
@@ -24,7 +25,9 @@ def train_model():
             optimizer.zero_grad()
 
             # foward pass
+            inputs = inputs.to(device)
             outputs = model(inputs)
+            labels = labels.to(device)
             loss = criterion(outputs, labels)  # caculate loss
             loss.backward()  # backward pass
             optimizer.step()  # update parameters
@@ -49,6 +52,8 @@ def train_model():
 
         with torch.no_grad(): 
             for inputs, labels in eval_loader:
+                inputs = inputs.to(device)
+                labels = labels.to(device)
                 outputs = model(inputs)
                 loss = criterion(outputs, labels)
                 eval_loss += loss.item() * inputs.size(0)
@@ -72,15 +77,22 @@ def train_model():
 if __name__ == "__main__":
     config_path = "./config_base.yaml"
     config, config_str = load_config(config_path)
-
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(device)
     model = get_model(config)
+    model = model.to(device)
+
+    # 打印 model 所在设备
     optimizer = optim.AdamW(model.parameters(), lr=1e-3, betas=(0.9, 0.98))
     criterion = nn.CrossEntropyLoss()
     epochs = config.train.epochs
 
-    train_loader, eval_loader = get_dataset(**config.train)
+    train_loader, eval_loader = get_dataset(device=device, **config.train)
 
-    train_acc, eval_acc = train_model()
+    start_time = datetime.now()
+    train_acc, eval_acc = train_model(model, device)
+    end_time = datetime.now()
+    print(f"Training time: {end_time - start_time}")
     plt.figure()
     t_step = torch.arange(1, epochs+1)
     plt.plot(t_step, train_acc, label="train")

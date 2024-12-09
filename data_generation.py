@@ -18,10 +18,11 @@ def generate_data(p):
     return inputs, labels
 
 # construct dataset
-def get_dataset(p, alpha, batch_size, **args):
+def get_dataset(p, alpha, batch_size, device: torch.device, **args):
     X, y = generate_data(p)
     total_size = X.shape[0]
-    
+    X = X.to(device)
+    y = y.to(device)
     num_train = int(total_size * alpha)
     num_eval = total_size - num_train
 
