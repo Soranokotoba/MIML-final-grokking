@@ -1,10 +1,11 @@
 from models import get_model
 from load_yaml import load_config
 from data_generation import get_dataset
+from optimizers import get_optimizer
+from lr_schedule import get_scheduler
 
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import matplotlib.pyplot as plt
 import os 
 
@@ -41,6 +42,9 @@ def train_model():
         epoch_accuracy = correct_preds / total_samples
         train_acc.append(epoch_accuracy)
 
+        # update the learning rate
+        scheduler.step()
+
         # evaluation after every epoch
         model.eval()
         eval_loss = 0.0
@@ -74,7 +78,8 @@ if __name__ == "__main__":
     config, config_str = load_config(config_path)
 
     model = get_model(config)
-    optimizer = optim.AdamW(model.parameters(), lr=1e-3, betas=(0.9, 0.98))
+    optimizer = get_optimizer(model, config.optim)
+    scheduler = get_scheduler(optimizer, config.optim.lr)
     criterion = nn.CrossEntropyLoss()
     epochs = config.train.epochs
 
