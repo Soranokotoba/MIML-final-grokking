@@ -1,4 +1,5 @@
 # Subtask 1
+### Exp 1
 对文章中的结果进行了复现，发现在50epoch左右的时候train accuracy就已经达到1.00，但test accuracy经历了一段相当长时间的过拟合，直到10000epoch左右的时候才上升到1.00附近，出现典型的grokking现象，如下图所示.
 ![](subtask1_accuracy.png)
 
