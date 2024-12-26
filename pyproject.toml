@@ -5,7 +5,7 @@ description = "Default template for PDM package"
 authors = [
     {name = "yhtq", email = "1414672068@qq.com"},
 ]
-dependencies = ["torch>=2.5.1", "omegaconf>=2.3.0", "einops>=0.8.0", "matplotlib>=3.9.3"]
+dependencies = ["torch>=2.5.1", "omegaconf>=2.3.0", "einops>=0.8.0", "matplotlib>=3.9.3", "tqdm>=4.67.1"]
 requires-python = "==3.12.*"
 readme = "README.md"
 license = {text = "none"}
@@ -16,3 +16,4 @@ distribution = false
 
 [tool.pdm.scripts]
 train = {cmd = "python train.py"}
+subtask3 = {cmd = "python subtask3.py"}

@@ -25,7 +25,16 @@ def set_seed(seed: int):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-def train_model():
+def train_model(
+        epochs: int,
+        model: nn.Module,
+        optimizer: torch.optim.Optimizer,
+        train_loader: torch.utils.data.DataLoader,
+        device: torch.device,
+        criterion: nn.Module,
+        scheduler: torch.optim.lr_scheduler.LambdaLR,
+        eval_loader: torch.utils.data.DataLoader
+):
     train_acc = []
     eval_acc = []
 
@@ -95,18 +104,22 @@ def train_model():
     return train_acc, eval_acc
 
 
-if __name__ == "__main__":
+def main(config_path: str, output_path: str, result_npz_path: str):
     # set random seed
     set_seed(42)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
     # read config file
-    config_path = "./config_base.yaml"
+    # config_path = "./config_base.yaml"
     config, config_str = load_config(config_path)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
     model = get_model(config)
     model = model.to(device)
+    try:
+        model.dropout = nn.Dropout(config.train.dropout)
+    except:
+        pass
     
     optimizer = get_optimizer(model, config.optim)
     scheduler = get_scheduler(optimizer, config.optim.lr)
@@ -115,8 +128,18 @@ if __name__ == "__main__":
 
     train_loader, eval_loader = get_dataset(device=device, **config.train)
 
-    train_acc, eval_acc = train_model()
-    np.savez('result.npz', train_acc=train_acc, eval_acc=eval_acc)
+    train_acc, eval_acc = train_model(
+        epochs,
+        model,
+        optimizer,
+        train_loader,
+        device,
+        criterion,
+        scheduler,
+        eval_loader
+    )
+    # np.savez('result.npz', train_acc=train_acc, eval_acc=eval_acc)
+    np.savez(result_npz_path, train_acc=train_acc, eval_acc=eval_acc)
     
     plt.figure()
     t_step = torch.arange(1, epochs+1)
@@ -126,4 +149,10 @@ if __name__ == "__main__":
     plt.ylabel("Accuracy(%)")
     plt.xscale('log')
     plt.legend()
-    plt.savefig("Accuracy.png")
+    # plt.savefig("Accuracy.png")
+    plt.savefig(output_path + ".png")
+
+if __name__ == "__main__":
+    config_path = "./config_base.yaml"
+    output_path = "Accuracy.png"
+    main(config_path, output_path, "result.npz")

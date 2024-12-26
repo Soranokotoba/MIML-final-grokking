@@ -1,0 +1,25 @@
+model_type: transformer # ['transformer', 'transformer_native']
+transformer: 
+    d_model: 128
+    n_head: 4
+    num_layers: 2
+    
+optim:
+    type: RMSprop
+    lr: 
+        type: const # ['const']
+        init_lr: 1e-3
+        warm_up: True
+        warmup_steps: 10 # used omly when warm_up is True
+    alpha: 0.99
+    eps: 1e-8
+    weight_decay: 0.1
+    momentum: 0.99
+    centered: False
+
+train:
+    p: 97
+    alpha: 0.5
+    batch_size: 512
+    epochs: 10000
+  
