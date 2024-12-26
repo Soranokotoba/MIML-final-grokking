@@ -150,7 +150,7 @@ def main(config_path: str, output_path: str, result_npz_path: str):
     plt.xscale('log')
     plt.legend()
     # plt.savefig("Accuracy.png")
-    plt.savefig(output_path + ".png")
+    plt.savefig(output_path)
 
 if __name__ == "__main__":
     config_path = "./config_base.yaml"

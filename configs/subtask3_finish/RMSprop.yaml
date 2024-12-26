@@ -8,18 +8,18 @@ optim:
     type: RMSprop
     lr: 
         type: const # ['const']
-        init_lr: 1e-3
+        init_lr: 5e-4
         warm_up: True
         warmup_steps: 10 # used omly when warm_up is True
     alpha: 0.99
     eps: 1e-8
-    weight_decay: 0.1
+    weight_decay: 0
     momentum: 0.99
-    centered: False
+    centered: True
 
 train:
     p: 97
     alpha: 0.5
     batch_size: 512
-    epochs: 10000
+    epochs: 15000
   
