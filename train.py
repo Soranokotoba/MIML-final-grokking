@@ -14,9 +14,6 @@ from tqdm import tqdm
 
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
-<<<<<<< HEAD
-def train_model(model: TransformerModel | Transformer, device: torch.device):
-=======
 def set_seed(seed: int):
     torch.manual_seed(seed)
     if torch.cuda.is_available():
@@ -29,7 +26,6 @@ def set_seed(seed: int):
     torch.backends.cudnn.benchmark = False
 
 def train_model():
->>>>>>> 0ed013fa17b72cf971444b2e9fe533854bc2c0d2
     train_acc = []
     eval_acc = []
 
