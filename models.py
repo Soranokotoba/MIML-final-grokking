@@ -72,6 +72,59 @@ class Transformer(torch.nn.Module):
 
         return self.model(embedding)[-1, :, :]
 
+# construct MLP model
+class MLP(nn.Module):
+    def __init__(self, num_tokens, output_dim, num_layers, embed_dim, hidden_dim, seq_len=5):
+        super(MLP, self).__init__()
+
+        self.token_embeddings = nn.Embedding(num_tokens, embed_dim)
+        self.position_embeddings = nn.Embedding(seq_len, embed_dim)
+        # fully connected layers
+        layer_list = [nn.Linear(embed_dim * (seq_len - 1), hidden_dim),
+                     nn.ReLU()]
+        for _ in range(num_layers - 1):
+            layer_list += [nn.Linear(hidden_dim, hidden_dim), 
+                          nn.ReLU()]
+        layer_list += [nn.Linear(hidden_dim, output_dim)]
+        self.model = nn.Sequential(*layer_list)
+
+    def forward(self, inputs):
+        batch_size, context_len = inputs.shape
+
+        token_embedding = self.token_embeddings(inputs)
+
+        positions = repeat(torch.arange(context_len, device=inputs.device), "p -> b p", b = batch_size)
+        position_embedding = self.position_embeddings(positions)
+
+        embedding = token_embedding + position_embedding
+        embedding = rearrange(embedding, 'b s d -> b (s d)')
+        # forward
+        return self.model(embedding)
+
+# construct LSTM model    
+class LSTMModel(nn.Module):
+    def __init__(self, num_tokens, output_dim, num_layers, embed_dim, hidden_dim, seq_len=5):
+        super(LSTMModel, self).__init__()
+
+        self.token_embeddings = nn.Embedding(num_tokens, embed_dim)
+        self.position_embeddings = nn.Embedding(seq_len, embed_dim)
+
+        self.lstm = nn.LSTM(embed_dim, hidden_dim, num_layers, batch_first=True)
+        self.fc = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, inputs):
+        batch_size, context_len = inputs.shape
+
+        token_embedding = self.token_embeddings(inputs)
+
+        positions = repeat(torch.arange(context_len, device=inputs.device), "p -> b p", b = batch_size)
+        position_embedding = self.position_embeddings(positions)
+
+        embedding = token_embedding + position_embedding
+        lstm_out, _ = self.lstm(embedding)
+        output = self.fc(lstm_out[:, -1, :])
+        return output
+
 def get_model(config: DictConfig):
     if config.model_type.lower() == 'transformer_native':
         model = TransformerModel(config.train.p+2, 
@@ -80,6 +133,14 @@ def get_model(config: DictConfig):
     elif config.model_type.lower() == 'transformer':
         model = Transformer(config.train.p+2, 
                             **config.transformer)
+    elif config.model_type.lower() == 'mlp':
+        model = MLP(config.train.p+2,
+                    config.train.p, 
+                    **config.mlp)
+    elif config.model_type.lower() == 'lstm':
+        model = LSTMModel(config.train.p+2,
+                          config.train.p,
+                          **config.lstm)
     else:
         raise ValueError(f"The model_type {config.model_type} is not supported!")
     return model
