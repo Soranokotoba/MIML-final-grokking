@@ -7,16 +7,16 @@ optim:
     type: sgd
     lr: 
         type: const # ['const']
-        init_lr: 1e-2
+        init_lr: 3e-2
         warm_up: True
         warmup_steps: 10 # used omly when warm_up is True
-    momentum: 0
+    momentum: 0.99
     weight_decay: 0
-    nesterov: false
+    nesterov: true
 
 train:
     p: 97
     alpha: 0.5
     batch_size: 512
-    epochs: 30000
+    epochs: 500
   
