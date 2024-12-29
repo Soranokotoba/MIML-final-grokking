@@ -16,4 +16,4 @@ train:
     p: 97
     alpha: 0.5
     batch_size: 512
-    epochs: 10000
+    epochs: 30000
