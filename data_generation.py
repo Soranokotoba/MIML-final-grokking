@@ -7,7 +7,6 @@ from torch.utils.data import Dataset, DataLoader
 
 CONSIDERING_ASSOC: Final[bool] = False
 DATA_TAKE_PROP: Final[float] = 0.9
-K: Final[int] = 2
 
 # Exp := Value | (Exp Op Exp)
 class Exp(ABC):
@@ -113,7 +112,7 @@ def enum_test():
     enum_exp_tensor_and_label_with_prop(p, K, 0.3)
 
 # generate training data
-def generate_data(p):
+def generate_data(p: int, K: int):
     # x = torch.arange(0, p)
     # y = torch.arange(0, p)
     # x, y = torch.cartesian_prod(x, y).T
@@ -130,8 +129,8 @@ def generate_data(p):
     return res
 
 # construct dataset
-def get_dataset(p, alpha, batch_size, device: torch.device, **args):
-    X, y = generate_data(p)
+def get_dataset(p, alpha, batch_size, device: torch.device, K: int = 2, **args):
+    X, y = generate_data(p, K)
     total_size = X.shape[0]
     X = X.to(device)
     y = y.to(device)

@@ -1,4 +1,5 @@
 model_type: transformer # ['transformer', 'transformer_native']
+K: 3
 transformer: 
     d_model: 128
     n_head: 4
