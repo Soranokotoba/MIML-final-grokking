@@ -17,3 +17,6 @@ distribution = false
 [tool.pdm.scripts]
 train = {cmd = "python train.py"}
 subtask3 = {cmd = "python subtask3.py"}
+subtask4 = {cmd = "python subtask4.py"}
+test_data = {call = "data_generation:generate_data(3)"}
+test_enum = {call = "data_generation:enum_test"}
