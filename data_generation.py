@@ -1,12 +1,15 @@
 from abc import ABC
 from enum import Enum
 from math import ceil
+import math
+import random
 from typing import Callable, Final, Iterable, Tuple
 import torch
 from torch.utils.data import Dataset, DataLoader
 
 CONSIDERING_ASSOC: Final[bool] = False
-DATA_TAKE_PROP: Final[float] = 1
+# DATA_TAKE_PROP: Final[float] = 0.5
+SAMPLING_COUNTS: Final[int] = 20000 # 注意这不是最终的准确结果，只是大约取这么多个样本
 
 # Exp := Value | (Exp Op Exp)
 class Exp(ABC):
@@ -93,23 +96,41 @@ def enum_exp_aux(p: int, remaining_k: int) -> Iterable[Exp]:
 def enum_exp_K(p: int, K: int) -> Iterable[Exp]:
     return enum_exp_aux(p, K)
 
+def enum_exp_with_prop_aux(p: int, prop: float, remaining_k: int) -> Iterable[Exp]:
+    if remaining_k == 1:
+        for a in range(p):
+            # yield Value(a)
+            if random.random() < prop:
+                yield Value(a)
+    else:
+        if CONSIDERING_ASSOC:
+            raise NotImplementedError
+        else:
+            for left in enum_exp_with_prop_aux(p, prop, 1):
+                for right in enum_exp_with_prop_aux(p, prop, remaining_k - 1):
+                    for op in [OpAddModP(p)]:
+                        if random.random() < prop:
+                            yield ExpOpExp(left, op, right)
+
 def enum_exp_with_prop(p: int, K: int, prop: float) -> Iterable[Exp]:
-    for exp in enum_exp_K(p, K):
-        if torch.rand(1) < prop:
-            yield exp
+    return enum_exp_with_prop_aux(p, prop, K)
 
 def enum_exp_tensor_and_label_with_prop(p: int, K: int, prop: float) -> Tuple[torch.Tensor, torch.Tensor]:
     exps = []
     labels = []
+    i = 0
     for exp in enum_exp_with_prop(p, K, prop):
+        i += 1
+        print(i)
+        # print(exp.print())
         exps.append(torch.cat([exp.encode(), torch.tensor([encode_eq(p)]),]))
         labels.append(exp.eval())
     return torch.stack(exps), torch.tensor(labels)
 
 def enum_test():
-    p = 7
-    K = 3
-    enum_exp_tensor_and_label_with_prop(p, K, 0.3)
+    p = 17
+    K = 4
+    enum_exp_tensor_and_label_with_prop(p, K, 0.9)
 
 # generate training data
 def generate_data(p: int, K: int):
@@ -124,8 +145,14 @@ def generate_data(p: int, K: int):
 
     # inputs = torch.stack([x, op, y, eq], dim=1)
     # return inputs, labels
-    res = enum_exp_tensor_and_label_with_prop(p, K, DATA_TAKE_PROP)
-    print(res)
+
+    # 至多取 10000 个样本
+    prop: float = min(1.0, SAMPLING_COUNTS / math.pow(p, K))
+    print(prop)
+    res = enum_exp_tensor_and_label_with_prop(p, K, math.pow(prop, 1.0 / (2 * K - 1)))
+    # res = enum_exp_tensor_and_label_with_prop(p, K, DATA_TAKE_PROP)
+    # res = enum_exp_tensor_and_label_with_prop(p, K, math.pow(DATA_TAKE_PROP, 1/5))
+    # print(res)
     return res
 
 # construct dataset

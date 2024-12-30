@@ -1,4 +1,4 @@
-model_type: transformer # ['transformer', 'transformer_native']
+model_type: transformer_native # ['transformer', 'transformer_native']
 K: 3
 transformer: 
     d_model: 128
@@ -8,7 +8,7 @@ optim:
     type: sgd
     lr: 
         type: const # ['const']
-        init_lr: 5e-2
+        init_lr: 1e-2
         warm_up: True
         warmup_steps: 10 # used omly when warm_up is True
     momentum: 0.99
@@ -19,5 +19,5 @@ train:
     p: 97
     alpha: 0.5
     batch_size: 512
-    epochs: 500
+    epochs: 1000
   
