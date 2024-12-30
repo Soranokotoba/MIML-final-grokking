@@ -136,17 +136,17 @@ def get_model(config: DictConfig):
                                  **config.transformer)
     elif config.model_type.lower() == 'transformer':
         model = Transformer(config.train.p+2,
-                             seq_len = 2 * K + 1,
+                             seq_len = 2 * K,
                             **config.transformer)
     elif config.model_type.lower() == 'mlp':
         model = MLP(config.train.p+2,
                     config.train.p, 
-                    seq_len = 2 * K + 1,
+                    seq_len = 2 * K,
                     **config.mlp)
     elif config.model_type.lower() == 'lstm':
         model = LSTMModel(config.train.p+2,
                           config.train.p,
-                          seq_len = 2 * K + 1,
+                          seq_len = 2 * K,
                           **config.lstm)
     else:
         raise ValueError(f"The model_type {config.model_type} is not supported!")

@@ -130,7 +130,7 @@ def main(config_path: str, output_path: str, result_npz_path: str):
     criterion = nn.CrossEntropyLoss()
     epochs = config.train.epochs
 
-    train_loader, eval_loader = get_dataset(device=device, K=K, **config.train)
+    train_loader, eval_loader = get_dataset(device=device, K=K,**config.train)
 
     train_acc, eval_acc = train_model(
         epochs,

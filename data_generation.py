@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 
 CONSIDERING_ASSOC: Final[bool] = False
-DATA_TAKE_PROP: Final[float] = 0.9
+DATA_TAKE_PROP: Final[float] = 1
 
 # Exp := Value | (Exp Op Exp)
 class Exp(ABC):
@@ -135,11 +135,12 @@ def get_dataset(p, alpha, batch_size, device: torch.device, K: int = 2, **args):
     X = X.to(device)
     y = y.to(device)
     num_train = int(total_size * alpha)
-    num_eval = total_size - num_train
+    num_eval = min(total_size - num_train, 3200)
+    num_abort = total_size - num_train - num_eval
 
     dataset = torch.utils.data.TensorDataset(X, y)
 
-    train_dataset, eval_dataset = torch.utils.data.random_split(dataset, [num_train, num_eval])
+    train_dataset, eval_dataset, _ = torch.utils.data.random_split(dataset, [num_train, num_eval, num_abort])
 
     batch_size = min(batch_size, ceil(total_size / 2))
 
