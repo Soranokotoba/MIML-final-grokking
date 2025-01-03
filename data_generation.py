@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 
 CONSIDERING_ASSOC: Final[bool] = False
 # DATA_TAKE_PROP: Final[float] = 0.5
-SAMPLING_COUNTS: Final[int] = 20000 # 注意这不是最终的准确结果，只是大约取这么多个样本
+SAMPLING_COUNTS: Final[int] = 4000000 # 注意这不是最终的准确结果，只是大约取这么多个样本
 
 # Exp := Value | (Exp Op Exp)
 class Exp(ABC):
@@ -121,7 +121,7 @@ def enum_exp_tensor_and_label_with_prop(p: int, K: int, prop: float) -> Tuple[to
     i = 0
     for exp in enum_exp_with_prop(p, K, prop):
         i += 1
-        print(i)
+        # print(i)
         # print(exp.print())
         exps.append(torch.cat([exp.encode(), torch.tensor([encode_eq(p)]),]))
         labels.append(exp.eval())
@@ -146,7 +146,7 @@ def generate_data(p: int, K: int):
     # inputs = torch.stack([x, op, y, eq], dim=1)
     # return inputs, labels
 
-    # 至多取 10000 个样本
+    # 大约取 SAMPLING_COUNTS 个样本
     prop: float = min(1.0, SAMPLING_COUNTS / math.pow(p, K))
     print(prop)
     res = enum_exp_tensor_and_label_with_prop(p, K, math.pow(prop, 1.0 / (2 * K - 1)))
